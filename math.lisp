@@ -1,0 +1,1 @@
+(defstruct pos x y)
