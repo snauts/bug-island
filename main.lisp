@@ -10,13 +10,21 @@
 
 (defparameter *old-age* 20)
 
+(defparameter *fov* 3)
+
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
 (load "map.lisp")
 
+(defun map-width ()
+  (length (elt *map* 0)))
+
+(defun map-height ()
+  (length *map*))
+
 (defun map-size ()
-  (list (length (elt *map* 0)) (length *map*)))
+  (list (map-width) (map-height)))
 
 (defun make-map ()
   (make-array (map-size) :initial-element nil))
@@ -87,7 +95,7 @@
 	(t #\?)))
 
 (defun last-cell-in-a-row (c)
-  (= (1- (first (map-size)))
+  (= (1- (map-width))
      (pos-x (cell-pos c))))
 
 (defun print-cell (c)
@@ -110,9 +118,28 @@
   (mapc (lambda (p) (add-bug (aref world (pos-x p) (pos-y p)) 1))
 	*bugs*))
 
+(defun get-fov-pos (c)
+  (mapcar (lambda (p) (pos-add (cell-pos c) p))
+	  (circle *fov*)))
+
+(defun good-pos (p)
+  (and (<= 0 (pos-x p) (1- (map-width)))
+       (<= 0 (pos-y p) (1- (map-height)))))
+
+(defun get-fov-cells (w c)
+  (mapcar (lambda (p) (aref w (pos-x p) (pos-y p)))
+	  (remove-if-not #'good-pos (get-fov-pos c))))
+
+(defun filter-fov-cells (w c)
+  (remove-if-not #'is-land (get-fov-cells w c)))
+
+(defun generate-fov (w)
+  (for-each-cell w (lambda (c) (setf (cell-fov c) (filter-fov-cells w c)))))
+
 (defun create-world ()
   (let ((world (make-map)))
     (fill-map world #'create-cell)
+    (generate-fov world)
     (create-bugs world)
     world))
 
