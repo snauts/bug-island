@@ -139,13 +139,12 @@
 (defun neighbor-of (c p)
   (first (member-if (lambda(c) (pos-eq p (cell-pos c))) (cell-fov c))))
 
+(defun from-to (c1 c2)
+  (neighbor-of c1 (step-to (cell-pos c1) (cell-pos c2))))
+
 (defun is-walkable (c1 c2)
   (unless (or (null c1) (not (is-land c1)))
-    (let ((p1 (cell-pos c1))
-	  (p2 (cell-pos c2)))
-      (or (pos-eq p1 p2)
-	  (let ((new-c1 (neighbor-of c1 (step-to p1 p2))))
-	    (is-walkable new-c1 c2))))))
+    (or (eq c1 c2) (is-walkable (from-to c1 c2) c2))))
 
 (defun walkable-fov (c1)
   (lambda (c2) (is-walkable c1 c2)))
@@ -215,17 +214,11 @@
 (defun best-move (b)
   (first (sort (copy-list (cell-fov (bug-cell b))) #'> :key #'cell-food)))
 
-(defun bug-step (b target)
-  (neighbor-of
-   (bug-cell b)
-   (step-to
-    (cell-pos (bug-cell b))
-    (cell-pos target))))
-
 (defun bug-moves (b)
   (when (= 0 (bug-food b))
-    (let ((target (best-move b)))
-      (move-bug (bug-cell b) (bug-step b target)))))
+    (let ((target (best-move b))
+	  (source (bug-cell b)))
+      (move-bug source (from-to source target)))))
 
 (defun bug-lives (b)
   (unless (bug-eats b)
