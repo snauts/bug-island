@@ -127,13 +127,38 @@
 (defun is-old (b)
   (>= (bug-age b) *old-age*))
 
-(defun bug-die (b)
+(defun is-big (b)
+  (>= (bug-size b) *max-size*))
+
+(defun bug-dies (b)
   (setf (cell-bug (bug-cell b)) nil))
+
+(defun bug-food (b &key (decrement 0))
+  (decf (cell-food (bug-cell b)) decrement))
+
+(defun bug-eats (b)
+  (let* ((is-food (> (bug-food b) 0)))
+    (when is-food
+      (bug-food b :decrement 1)
+      (when (not (is-big b))
+	(incf (bug-size b))))
+    is-food))
+
+(defun bug-starves (b)
+  (cond ((= 0 (bug-size b))
+	 (bug-dies b))
+	((= 0 (bug-food b))
+	 (decf (bug-size b)))))
+
+(defun bug-lives (b)
+  (unless (bug-eats b)
+    (bug-starves b)))
 
 (defun bugs-life (b)
   (incf (bug-age b))
   (if (is-old b)
-      (bug-die b)))
+      (bug-dies b)
+      (bug-lives b)))
 
 (defun advance (world)
   (for-each-cell world #'grow-cell)
