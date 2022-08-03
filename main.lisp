@@ -2,6 +2,12 @@
 
 (defstruct bug home age size)
 
+(defparameter *max-food* 10)
+(defparameter *low-food* 5)
+
+(defparameter *max-size* 10)
+(defparameter *low-size* 5)
+
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
@@ -30,10 +36,6 @@
 (defun char-from-map (p)
   (aref (aref *map* (pos-y p)) (pos-x p)))
 
-(defparameter *max-food* 10)
-(defparameter *low-food* 5)
-(defparameter *no-food* 0)
-
 (defun get-type (p)
   (case (char-from-map p)
     (#\space 'land)
@@ -43,9 +45,9 @@
 
 (defun get-food (p)
   (case (char-from-map p)
-    (#\space *no-food*)
     (#\. *low-food*)
-    (#\* *max-food*)))
+    (#\* *max-food*)
+    (#\space 0)))
 
 (defun create-cell (p)
   (make-cell :pos p :bug nil :type (get-type p) :food (get-food p)))
@@ -57,10 +59,13 @@
   (eq 'water (cell-type c)))
 
 (defun is-barren (c)
-  (= (cell-food c) *no-food*))
+  (= 0 (cell-food c)))
 
 (defun is-growable (c)
-  (< *no-food* (cell-food c) *max-food*))
+  (< 0 (cell-food c) *max-food*))
+
+(defun is-occupied (c)
+  (not (null (cell-bug c))))
 
 (defun is-rich (c)
   (> (cell-food c) *low-food*))
@@ -70,8 +75,12 @@
 	((is-rich c) #\*)
 	(t #\.)))
 
+(defun bug-char (b)
+  (if (> (bug-size b) *low-size*) #\O #\o))
+
 (defun cell-char (c)
-  (cond ((is-land c) (land-char c))
+  (cond ((is-occupied c) (bug-char (cell-bug c)))
+	((is-land c) (land-char c))
 	((is-water c) #\-)
 	(t #\?)))
 
@@ -85,7 +94,9 @@
     (format t "~%")))
 
 (defun grow-cell (c)
-  (when (and (is-land c) (is-growable c))
+  (when (and (is-land c)
+	     (is-growable c)
+	     (not (is-occupied c)))
     (incf (cell-food c))))
 
 (defun create-world ()
@@ -93,12 +104,15 @@
     (fill-map world #'create-cell)
     world))
 
+(defun advance (world)
+  (for-each-cell world #'grow-cell))
+
 (defun bug-island (world)
   (let ((epoch 0))
     (loop
       (incf epoch)
+      (advance world)
       (format t "N=~A~%" epoch)
-      (for-each-cell world #'grow-cell)
       (for-each-cell world #'print-cell)
       (sleep 1))))
 
