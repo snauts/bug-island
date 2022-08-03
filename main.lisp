@@ -185,6 +185,9 @@
 (defun bug-dies (b)
   (setf (cell-bug (bug-cell b)) nil))
 
+(defun bug-dead (b)
+  (null (cell-bug (bug-cell b))))
+
 (defun bug-food (b &key (decrement 0))
   (decf (cell-food (bug-cell b)) decrement))
 
@@ -202,9 +205,33 @@
 	((= 0 (bug-food b))
 	 (decf (bug-size b)))))
 
+(defun move-bug (c1 c2)
+  (cond ((is-occupied c2)
+	 (error "target cell already occupied"))
+	(t (setf (bug-cell (cell-bug c1)) c2)
+	   (setf (cell-bug c2) (cell-bug c1))
+	   (setf (cell-bug c1) nil))))
+
+(defun best-move (b)
+  (first (sort (copy-list (cell-fov (bug-cell b))) #'> :key #'cell-food)))
+
+(defun bug-step (b target)
+  (neighbor-of
+   (bug-cell b)
+   (step-to
+    (cell-pos (bug-cell b))
+    (cell-pos target))))
+
+(defun bug-moves (b)
+  (when (= 0 (bug-food b))
+    (let ((target (best-move b)))
+      (move-bug (bug-cell b) (bug-step b target)))))
+
 (defun bug-lives (b)
   (unless (bug-eats b)
-    (bug-starves b)))
+    (bug-starves b))
+  (unless (bug-dead b)
+    (bug-moves b)))
 
 (defun bugs-life (b)
   (incf (bug-age b))
