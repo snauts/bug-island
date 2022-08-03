@@ -8,6 +8,8 @@
 (defparameter *max-size* 10)
 (defparameter *low-size* 5)
 
+(defparameter *old-age* 20)
+
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
@@ -105,7 +107,8 @@
       (setf (cell-bug c) (make-bug :cell c :age 0 :size size))))
 
 (defun create-bugs (world)
-  (mapc (lambda (p) (add-bug (aref world (pos-x p) (pos-y p)) 1)) *bugs*))
+  (mapc (lambda (p) (add-bug (aref world (pos-x p) (pos-y p)) 1))
+	*bugs*))
 
 (defun create-world ()
   (let ((world (make-map)))
@@ -113,8 +116,28 @@
     (create-bugs world)
     world))
 
+(defun collect-all-bugs (world)
+  (let ((bugs nil))
+    (for-each-cell
+     world
+     (lambda (c) (when (is-occupied c)
+		   (push (cell-bug c) bugs))))
+    bugs))
+
+(defun is-old (b)
+  (>= (bug-age b) *old-age*))
+
+(defun bug-die (b)
+  (setf (cell-bug (bug-cell b)) nil))
+
+(defun bugs-life (b)
+  (incf (bug-age b))
+  (if (is-old b)
+      (bug-die b)))
+
 (defun advance (world)
-  (for-each-cell world #'grow-cell))
+  (for-each-cell world #'grow-cell)
+  (mapc #'bugs-life (collect-all-bugs world)))
 
 (defun bug-island (world)
   (let ((epoch 0))
@@ -123,7 +146,7 @@
       (advance world)
       (format t "N=~A~%" epoch)
       (for-each-cell world #'print-cell)
-      (sleep 1))))
+      (sleep 0.2))))
 
 (defun top-level ()
   (handler-case (bug-island (create-world))
