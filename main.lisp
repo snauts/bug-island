@@ -8,4 +8,4 @@
 (load "map.lisp")
 
 (defun map-size ()
-  (make-pos :x (length (first *map*)) :y (length *map*)))
+  (make-pos :x (length (elt +map+ 0)) :y (length +map+)))
