@@ -38,4 +38,4 @@
 	       (d (distance p)))
 	  (when (and (< 0 d (1+ (expt l 2))))
 	    (push p result)))))
-    result))
+    (sort result #'< :key #'distance)))
