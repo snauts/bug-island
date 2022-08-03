@@ -130,11 +130,36 @@
   (mapcar (lambda (p) (aref w (pos-x p) (pos-y p)))
 	  (remove-if-not #'good-pos (get-fov-pos c))))
 
-(defun filter-fov-cells (w c)
+(defun visible-fov-cells (w c)
   (remove-if-not #'is-land (get-fov-cells w c)))
 
+(defun step-to (p1 p2)
+  (pos-add p1 (normalize (pos-sub p2 p1))))
+
+(defun neighbor-of (c p)
+  (first (member-if (lambda(c) (pos-eq p (cell-pos c))) (cell-fov c))))
+
+(defun is-walkable (c1 c2)
+  (unless (or (null c1) (not (is-land c1)))
+    (let ((p1 (cell-pos c1))
+	  (p2 (cell-pos c2)))
+      (or (pos-eq p1 p2)
+	  (let ((new-c1 (neighbor-of c1 (step-to p1 p2))))
+	    (is-walkable new-c1 c2))))))
+
+(defun walkable-fov (c1)
+  (lambda (c2) (is-walkable c1 c2)))
+
+(defun walkable-fov-cells (w c)
+  (declare (ignore w))
+  (remove-if-not (walkable-fov c) (cell-fov c)))
+
+(defun filter-fov-by (w fn)
+  (for-each-cell w (lambda (c) (setf (cell-fov c) (funcall fn w c)))))
+
 (defun generate-fov (w)
-  (for-each-cell w (lambda (c) (setf (cell-fov c) (filter-fov-cells w c)))))
+  (filter-fov-by w #'visible-fov-cells)
+  (filter-fov-by w #'walkable-fov-cells))
 
 (defun create-world ()
   (let ((world (make-map)))

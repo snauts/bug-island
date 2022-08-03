@@ -8,8 +8,23 @@
   (cdr p))
 
 (defun pos-add (a b)
-  (make-pos (+ (pos-x a) (pos-x b))
-	    (+ (pos-y a) (pos-y b))))
+  (make-pos
+   (+ (pos-x a) (pos-x b))
+   (+ (pos-y a) (pos-y b))))
+
+(defun pos-sub (a b)
+  (make-pos
+   (- (pos-x a) (pos-x b))
+   (- (pos-y a) (pos-y b))))
+
+(defun pos-eq (a b)
+  (and (= (pos-x a) (pos-x b))
+       (= (pos-y a) (pos-y b))))
+
+(defun normalize (p)
+  (make-pos
+   (signum (pos-x p))
+   (signum (pos-y p))))
 
 (defun distance (p)
   (+ (expt (pos-x p) 2)
