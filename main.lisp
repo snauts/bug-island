@@ -1,6 +1,6 @@
 (defstruct cell pos type food bug)
 
-(defstruct bug home age size)
+(defstruct bug cell age size)
 
 (defparameter *max-food* 10)
 (defparameter *low-food* 5)
@@ -99,9 +99,18 @@
 	     (not (is-occupied c)))
     (incf (cell-food c))))
 
+(defun add-bug (c size)
+  (if (is-occupied c)
+      (error "cell already occupied")
+      (setf (cell-bug c) (make-bug :cell c :age 0 :size size))))
+
+(defun create-bugs (world)
+  (mapc (lambda (p) (add-bug (aref world (pos-x p) (pos-y p)) 1)) *bugs*))
+
 (defun create-world ()
   (let ((world (make-map)))
     (fill-map world #'create-cell)
+    (create-bugs world)
     world))
 
 (defun advance (world)
