@@ -232,7 +232,7 @@
     (first (sort (remove-if #'is-occupied fov) #'> :key #'cell-food))))
 
 (defun is-greedy (b src dst)
-  (and (< *low-food* (bug-food b))
+  (and (> *low-food* (bug-food b))
        (> (cell-food dst) (cell-food src))))
 
 (defun bug-moves (b)
