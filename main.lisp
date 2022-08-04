@@ -78,7 +78,8 @@
   (delete-if-not (lambda (c2) (is-distance-one c1 c2)) (cell-fov c1)))
 
 (defun has-nearby-forest (c1)
-  (member *max-food* (mapcar #'cell-food (adjacent-cells c1))))
+  (member-if (lambda (x) (= *max-food* (cell-food x)))
+	     (adjacent-cells c1)))
 
 (defun is-growable (c)
   (or (< 0 (cell-food c) *max-food*)
