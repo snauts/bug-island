@@ -184,9 +184,7 @@
 (defun collect-all-bugs (world)
   (let ((bugs nil))
     (for-each-cell
-     world
-     (lambda (c) (when (is-occupied c)
-		   (push (cell-bug c) bugs))))
+     world (lambda (c) (when (is-occupied c) (push (cell-bug c) bugs))))
     bugs))
 
 (defun is-old (b)
@@ -272,6 +270,6 @@
 	(sleep 1)))))
 
 (defun top-level ()
-  (handler-case (bug-island 5 (create-world))
+  (handler-case (bug-island 20 (create-world))
     (condition (var) (format t "ERROR: ~A~%" var)))
   (uiop:quit 0))
