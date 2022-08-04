@@ -16,7 +16,8 @@
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
-(load "map.lisp")
+;(load "map.lisp")
+(load "map2.lisp")
 
 (defun map-width ()
   (length (elt *map* 0)))
