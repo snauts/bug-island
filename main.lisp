@@ -231,14 +231,15 @@
   (let ((fov (copy-list (cell-fov (bug-cell b)))))
     (first (sort (remove-if #'is-occupied fov) #'> :key #'cell-food))))
 
-(defun is-greedy (b src dst)
-  (and (> *low-food* (bug-food b))
-       (> (cell-food dst) (cell-food src))))
+(defun is-greedy (src dst)
+  (and (not (is-rich src))
+       (> (cell-food dst)
+	  (cell-food src))))
 
 (defun bug-moves (b)
   (let ((dst (best-move b))
 	(src (bug-cell b)))
-    (when (and dst (or (is-big b) (is-greedy b src dst)))
+    (when (and dst (or (is-big b) (is-greedy src dst)))
       (move-bug b src (from-to src dst)))))
 
 (defun bug-lives (b)
