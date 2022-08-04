@@ -217,7 +217,8 @@
       (make-baby c1 b))))
 
 (defun best-move (b)
-  (first (sort (copy-list (cell-fov (bug-cell b))) #'> :key #'cell-food)))
+  (let ((fov (copy-list (cell-fov (bug-cell b)))))
+    (first (sort (remove-if #'is-occupied fov) #'> :key #'cell-food))))
 
 (defun is-greedy (b src dst)
   (and (< *low-food* (bug-food b))
@@ -226,7 +227,7 @@
 (defun bug-moves (b)
   (let ((dst (best-move b))
 	(src (bug-cell b)))
-    (when (or (is-big b) (is-greedy b src dst))
+    (when (and dst (or (is-big b) (is-greedy b src dst)))
       (move-bug b src (from-to src dst)))))
 
 (defun bug-lives (b)
