@@ -10,7 +10,7 @@
 
 (defparameter *old-age* 20)
 
-(defparameter *fov* 10)
+(defparameter *fov* 5)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
@@ -131,7 +131,7 @@
 
 (defun get-fov-pos (c)
   (mapcar (lambda (p) (pos-add (cell-pos c) p))
-	  (circle *fov*)))
+	  (circle *fov* (cell-pos c))))
 
 (defun good-pos (p)
   (and (<= 0 (pos-x p) (1- (map-width)))

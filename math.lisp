@@ -30,11 +30,16 @@
   (+ (expt (pos-x p) 2)
      (expt (pos-y p) 2)))
 
-(defun circle (l)
-  (let ((result nil))
+(defun dir (x)
+  (if (oddp x) -1 1))
+
+(defun circle (l p)
+  (let ((result nil)
+	(sx (dir (pos-x p)))
+	(sy (dir (pos-y p))))
     (loop for y from (- l) to l do
       (loop for x from (- l) to l do
-	(let* ((p (make-pos x y))
+	(let* ((p (make-pos (* sx x) (* sy y)))
 	       (d (distance p)))
 	  (when (and (< 0 d (1+ (expt l 2))))
 	    (push p result)))))
