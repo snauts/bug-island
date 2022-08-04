@@ -91,9 +91,12 @@
 (defun is-rich (c)
   (> (cell-food c) *low-food*))
 
+(defun is-forest (c)
+  (= (cell-food c) *max-food*))
+
 (defun land-char (c)
   (cond ((is-barren c) #\space)
-	((is-rich c) #\*)
+	((is-forest c) #\*)
 	(t #\.)))
 
 (defun bug-char (b)
