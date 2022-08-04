@@ -10,7 +10,7 @@
 
 (defparameter *old-age* 20)
 
-(defparameter *fov* 3)
+(defparameter *fov* 7)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
@@ -262,7 +262,7 @@
     (loop
       (incf epoch)
       (advance world)
-      (when (= 0 (mod epoch step))
+      (when (= 1 (mod epoch step))
 	(format t "N=~A~%" epoch)
 	(for-each-cell world #'print-cell)
 	(sleep 1)))))
