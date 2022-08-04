@@ -234,8 +234,9 @@
 
 (defun is-greedy (src dst)
   (and (not (is-rich src))
-       (> (cell-food dst)
-	  (cell-food src))))
+       (or (= 0 (cell-food src))
+	   (> (cell-food dst)
+	      (cell-food src)))))
 
 (defun bug-moves (b)
   (let ((dst (best-move b))
