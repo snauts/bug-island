@@ -97,18 +97,23 @@
 (defun is-forest (c)
   (= (cell-food c) *max-food*))
 
+(defun color-code (n p)
+  (format nil "~c[~Am~A" #\ESC n p))
+
 (defun land-char (c)
-  (cond ((is-barren c) #\space)
-	((is-forest c) #\*)
-	(t #\.)))
+  (cond ((is-barren c) (color-code 30 " "))
+	((is-forest c) (color-code 32 "*"))
+	(t (color-code 33 "."))))
 
 (defun bug-char (b)
-  (if (> (bug-size b) *low-size*) #\O #\o))
+  (if (> (bug-size b) *low-size*)
+      (color-code 31 "O")
+      (color-code 31 "o")))
 
 (defun cell-char (c)
   (cond ((is-occupied c) (bug-char (cell-bug c)))
 	((is-land c) (land-char c))
-	((is-water c) #\-)
+	((is-water c) (color-code 36 #\-))
 	(t #\?)))
 
 (defun last-cell-in-a-row (c)
@@ -278,7 +283,7 @@
 	  (format t "N=~A~%" epoch)
 	  (for-each-cell world #'print-cell)
 	  (if (not extinction)
-	      (sleep (if (= 1 step) 0.05 1.0))
+	      (sleep (if (= 1 step) 0.02 1.0))
 	      (quit)))))))
 
 (defun top-level (&optional n)
