@@ -246,16 +246,17 @@
   (for-each-cell world #'grow-cell)
   (mapc #'bugs-life (collect-all-bugs world)))
 
-(defun bug-island (world)
+(defun bug-island (step world)
   (let ((epoch 0))
     (loop
       (incf epoch)
       (advance world)
-      (format t "N=~A~%" epoch)
-      (for-each-cell world #'print-cell)
-      (sleep 0.2))))
+      (when (= 0 (mod epoch step))
+	(format t "N=~A~%" epoch)
+	(for-each-cell world #'print-cell)
+	(sleep 1)))))
 
 (defun top-level ()
-  (handler-case (bug-island (create-world))
+  (handler-case (bug-island 5 (create-world))
     (condition (var) (format t "ERROR: ~A~%" var)))
   (uiop:quit 0))
