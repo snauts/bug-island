@@ -262,16 +262,22 @@
   (for-each-cell world #'grow-cell)
   (mapcar #'bugs-life (collect-all-bugs world)))
 
+(defun roll-screen ()
+  (dotimes (i (1+ (map-height)))
+    (format t "~%")))
+
 (defun bug-island (step world)
   (let ((epoch 0))
+    (roll-screen)
     (loop
       (incf epoch)
       (let ((extinction (null (advance world))))
 	(when (or extinction (= 0 (mod epoch step)))
+	  (format t "~c[~AA" #\ESC (1+ (map-height)))
 	  (format t "N=~A~%" epoch)
 	  (for-each-cell world #'print-cell)
 	  (if (not extinction)
-	      (sleep 1)
+	      (sleep (if (= 1 step) 0.05 1.0))
 	      (quit)))))))
 
 (defun top-level (&optional n)
