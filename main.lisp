@@ -1,6 +1,6 @@
 (defstruct cell pos type food bug fov)
 
-(defstruct bug cell age size)
+(defstruct bug cell age size prey)
 
 (defparameter *max-food* 10)
 (defparameter *low-food* 5)
@@ -271,23 +271,28 @@
   (dotimes (i (1+ (map-height)))
     (format t "~%")))
 
+(defun delay (step)
+  (cond ((= 0 step) nil)
+	((= 1 step) (sleep 0.02))
+	(t (sleep 1))))
+
 (defun bug-island (step world)
   (let ((epoch 0))
     (roll-screen)
     (loop
       (incf epoch)
       (let ((extinction (null (advance world))))
-	(when (or extinction (= 0 (mod epoch step)))
+	(when (or extinction (= 0 (mod epoch (max 1 step))))
 	  (format t "~c[~AA" #\ESC (1+ (map-height)))
-	  (format t "N=~A~%" epoch)
+	  (format t "~AN=~A~%" (color-code 37) epoch)
 	  (for-each-cell world #'print-cell)
 	  (if (not extinction)
-	      (sleep (if (= 1 step) 0.02 1.0))
+	      (delay step)
 	      (quit)))))))
 
 (defun run-island (file n)
   (when (> (length file) 0) (load file))
-  (bug-island (max 1 (or n 1)) (create-world)))
+  (bug-island (or n 1) (create-world)))
 
 (defun top-level (file &optional n)
   (handler-case (run-island file n)
