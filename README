@@ -2,6 +2,8 @@ Bug Island, inspired by Ellen Ullman's novel `the Bug`
 
 1) install sbcl
 2) run ./run.sh
+3) ./run.sh 1000		# skip time by 1000 steps
+4) ./run.sh 1 map2.lisp 	# runs simulation on map2
 
 "-" = water
 " " = barren land

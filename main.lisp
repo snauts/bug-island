@@ -16,8 +16,7 @@
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
-;(load "map.lisp")
-(load "map2.lisp")
+(load "map.lisp")
 
 (defun map-width ()
   (length (elt *map* 0)))
@@ -97,18 +96,18 @@
 (defun is-forest (c)
   (= (cell-food c) *max-food*))
 
-(defun color-code (n p)
+(defun color-code (n &optional (p ""))
   (format nil "~c[~Am~A" #\ESC n p))
 
 (defun land-char (c)
-  (cond ((is-barren c) (color-code 30 " "))
-	((is-forest c) (color-code 32 "*"))
-	(t (color-code 33 "."))))
+  (cond ((is-forest c) (color-code 92 #\*))
+	((is-barren c) #\space)
+	(t (color-code 32 #\.))))
 
 (defun bug-char (b)
   (if (> (bug-size b) *low-size*)
-      (color-code 31 "O")
-      (color-code 31 "o")))
+      (color-code 91 #\O)
+      (color-code 31 #\o)))
 
 (defun cell-char (c)
   (cond ((is-occupied c) (bug-char (cell-bug c)))
@@ -286,7 +285,11 @@
 	      (sleep (if (= 1 step) 0.02 1.0))
 	      (quit)))))))
 
-(defun top-level (&optional n)
-  (handler-case (bug-island (or n 1) (create-world))
-    (condition (var) (format t "ERROR: ~A~%" var)))
+(defun run-island (file n)
+  (when (> (length file) 0) (load file))
+  (bug-island (max 1 (or n 1)) (create-world)))
+
+(defun top-level (file &optional n)
+  (handler-case (run-island file n)
+    (condition (var) (format t "~AERROR: ~A~%" (color-code 37) var)))
   (uiop:quit 0))

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sbcl --noinform --load main.lisp --eval "(top-level $1)"
+sbcl --noinform --load main.lisp --eval "(top-level \"$2\" $1)"
