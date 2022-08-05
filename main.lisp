@@ -12,6 +12,7 @@
 (defparameter *old-age* 20)
 
 (defparameter *fov* 5)
+(defvar *predator* nil)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
@@ -76,7 +77,7 @@
   (>= len (distance (pos-sub (cell-pos c1) (cell-pos c2)))))
 
 (defun adjacent-cells (c1 len)
-  (delete-if-not (lambda (c2) (distance-less len c1 c2)) (cell-fov c1)))
+  (remove-if-not (lambda (c2) (distance-less len c1 c2)) (cell-fov c1)))
 
 (defun has-nearby-forest (c1)
   (member-if (lambda (x) (<= *sow-size* (cell-food x)))
@@ -146,10 +147,10 @@
 	     (not (is-occupied c)))
     (incf (cell-food c))))
 
-(defun add-bug (c size)
+(defun add-bug (c &key (size 1) (prey nil))
   (if (is-occupied c)
       (error "cell already occupied")
-      (setf (cell-bug c) (make-bug :cell c :age 0 :size size))))
+      (setf (cell-bug c) (make-bug :cell c :age 0 :size size :prey prey))))
 
 (defun create-bugs (world)
   (for-each-cell
@@ -157,7 +158,7 @@
    (lambda (c)
      (when (is-land c)
        (let ((pos (cell-pos c)))
-	 (add-bug (aref world (pos-x pos) (pos-y pos)) 1)
+	 (add-bug (aref world (pos-x pos) (pos-y pos)))
 	 (return-from create-bugs nil))))))
 
 (defun get-fov-pos (c)
@@ -246,7 +247,7 @@
 
 (defun make-baby (c b)
   (setf (bug-size b) *low-size*)
-  (add-bug c *low-size*))
+  (add-bug c :size *low-size* :prey (bug-prey b)))
 
 (defun move-bug (b c1 c2)
   (when (not (is-occupied c2))
@@ -272,11 +273,20 @@
     (when (and dst (or (is-big b) (is-greedy src dst)))
       (move-bug b src (from-to src dst)))))
 
+(defun occupied-count (b)
+  (remove-if-not #'is-occupied (adjacent-cells (bug-cell b) 2)))
+
+(defun surrouned (b)
+  (= 8 (length (occupied-count b))))
+
 (defun bug-lives (b)
   (unless (bug-eats b)
     (bug-starves b))
   (unless (bug-dead b)
-    (bug-moves b)))
+    (bug-moves b)
+    (when (and (not *predator*) (surrouned b))
+      (turn-into-predator b)
+      (setf *predator* b))))
 
 (defun bugs-life (b)
   (incf (bug-age b))
@@ -298,7 +308,8 @@
 	(t (sleep 1))))
 
 (defun bug-island (step world)
-  (let ((epoch 0))
+  (let ((*predator* nil)
+	(epoch 0))
     (roll-screen)
     (loop
       (incf epoch)
