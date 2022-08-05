@@ -72,15 +72,15 @@
 (defun is-barren (c)
   (= 0 (cell-food c)))
 
-(defun is-distance-one (c1 c2)
-  (= 1 (distance (pos-sub (cell-pos c1) (cell-pos c2)))))
+(defun distance-less (len c1 c2)
+  (>= len (distance (pos-sub (cell-pos c1) (cell-pos c2)))))
 
-(defun adjacent-cells (c1)
-  (delete-if-not (lambda (c2) (is-distance-one c1 c2)) (cell-fov c1)))
+(defun adjacent-cells (c1 len)
+  (delete-if-not (lambda (c2) (distance-less len c1 c2)) (cell-fov c1)))
 
 (defun has-nearby-forest (c1)
   (member-if (lambda (x) (<= *sow-size* (cell-food x)))
-	     (adjacent-cells c1)))
+	     (adjacent-cells c1 1)))
 
 (defun is-growable (c)
   (or (< 0 (cell-food c) *max-food*)
