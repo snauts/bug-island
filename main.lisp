@@ -104,9 +104,18 @@
 	((is-barren c) #\space)
 	(t (color-code 32 #\.))))
 
+(defun is-predator (b)
+  (numberp (bug-prey b)))
+
+(defun turn-into-predator (b)
+  (setf (bug-prey b) 0))
+
+(defun is-grazer (b)
+  (not (is-predator b)))
+
 (defun bug-char (b)
   (let ((big (> (bug-size b) *low-size*))
-	(bad (numberp (bug-prey b))))
+	(bad (is-predator b)))
     (cond ((and (not big) (not bad))
 	   (color-code 31 #\o))
 	  ((and big (not bad))
