@@ -229,7 +229,9 @@
   (null (cell-bug (bug-cell b))))
 
 (defun bug-food (b &key (decrement 0))
-  (decf (cell-food (bug-cell b)) decrement))
+  (if (is-predator b)
+      (decf (bug-prey b) decrement)
+      (decf (cell-food (bug-cell b)) decrement)))
 
 (defun bug-eats (b)
   (let* ((is-food (> (bug-food b) 0)))
@@ -247,9 +249,19 @@
 
 (defun make-baby (c b)
   (setf (bug-size b) *low-size*)
-  (add-bug c :size *low-size* :prey (bug-prey b)))
+  (add-bug c :size *low-size* :prey (bug-prey b))
+  (when (is-predator b)
+    (setf (bug-prey b) 0))) ; all the predator food stock goes to baby
+
+(defun attack-prey (b c2)
+  (when (and (is-occupied c2) (is-predator b))
+    (let ((victim (cell-bug c2)))
+      (when (is-grazer victim)
+	(setf (bug-prey b) (bug-size victim))
+	(bug-dies victim)))))
 
 (defun move-bug (b c1 c2)
+  (attack-prey b c2)
   (when (not (is-occupied c2))
     (setf (bug-cell b) c2)
     (setf (cell-bug c2) b)
@@ -257,9 +269,25 @@
     (when (is-big b)
       (make-baby c1 b))))
 
-(defun best-move (b)
+(defun best-pasture (b)
   (let ((fov (copy-list (cell-fov (bug-cell b)))))
     (first (sort (remove-if #'is-occupied fov) #'> :key #'cell-food))))
+
+(defun cell-meat (c)
+  (let ((b (cell-bug c)))
+    (and b (is-grazer b))))
+
+(defun hunt-value (c)
+  (bug-size (cell-bug c)))
+
+(defun best-hunt (b)
+  (let ((fov (copy-list (cell-fov (bug-cell b)))))
+    (first (sort (remove-if-not #'cell-meat fov) #'> :key #'hunt-value))))
+
+(defun best-move (b)
+  (if (is-grazer b)
+      (best-pasture b)
+      (best-hunt b)))
 
 (defun is-greedy (src dst)
   (and (not (is-rich src))
@@ -267,10 +295,15 @@
 	   (> (cell-food dst)
 	      (cell-food src)))))
 
+(defun should-move (b src dst)
+  (if (is-grazer b)
+      (is-greedy src dst)
+      (= 0 (bug-prey b))))
+
 (defun bug-moves (b)
   (let ((dst (best-move b))
 	(src (bug-cell b)))
-    (when (and dst (or (is-big b) (is-greedy src dst)))
+    (when (and dst (or (is-big b) (should-move b src dst)))
       (move-bug b src (from-to src dst)))))
 
 (defun occupied-count (b)
@@ -280,13 +313,13 @@
   (= 8 (length (occupied-count b))))
 
 (defun bug-lives (b)
+  (when (and (not *predator*) (surrouned b))
+    (turn-into-predator b)
+    (setf *predator* t))
   (unless (bug-eats b)
     (bug-starves b))
   (unless (bug-dead b)
-    (bug-moves b)
-    (when (and (not *predator*) (surrouned b))
-      (turn-into-predator b)
-      (setf *predator* b))))
+    (bug-moves b)))
 
 (defun bugs-life (b)
   (incf (bug-age b))
