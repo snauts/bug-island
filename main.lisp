@@ -143,8 +143,13 @@
       (setf (cell-bug c) (make-bug :cell c :age 0 :size size))))
 
 (defun create-bugs (world)
-  (mapc (lambda (p) (add-bug (aref world (pos-x p) (pos-y p)) 1))
-	*bugs*))
+  (for-each-cell
+   world
+   (lambda (c)
+     (when (is-land c)
+       (let ((pos (cell-pos c)))
+	 (add-bug (aref world (pos-x pos) (pos-y pos)) 1)
+	 (return-from create-bugs nil))))))
 
 (defun get-fov-pos (c)
   (mapcar (lambda (p) (pos-add (cell-pos c) p))
