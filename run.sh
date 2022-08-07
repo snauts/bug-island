@@ -3,8 +3,8 @@
 STEP=${STEP:-1}
 DELAY=${DELAY:-'0.02'}
 MAP=${MAP:-'map.lisp'}
-REGROWTH=${REGROWTH:-'2'}
-LIFESPAN=${LIFESPAN:-'20'}
+REGROWTH=${REGROWTH:-'6'}
+LIFESPAN=${LIFESPAN:-'14'}
 sbcl --noinform --load main.lisp \
      --eval "(setf *file* \"$MAP\")" \
      --eval "(setf *delay* $DELAY)" \
