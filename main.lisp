@@ -258,10 +258,11 @@
   (>= (bug-size b) *max-size*))
 
 (defun bug-dies (b)
-  (plant-bug (bug-cell b) nil))
+  (plant-bug (bug-cell b) nil)
+  (setf (bug-cell b) nil))
 
 (defun bug-dead (b)
-  (null (cell-bug (bug-cell b))))
+  (null (bug-cell b)))
 
 (defun bug-food (b &key (decrement 0))
   (if (is-predator b)
@@ -356,10 +357,11 @@
     (bug-moves b)))
 
 (defun bugs-life (b)
-  (incf (bug-age b))
-  (if (is-old b)
-      (bug-dies b)
-      (bug-lives b)))
+  (unless (bug-dead b)
+    (incf (bug-age b))
+    (if (is-old b)
+	(bug-dies b)
+	(bug-lives b))))
 
 (defun advance (world)
   (for-each-cell world #'grow-cell)
