@@ -160,11 +160,14 @@
 (defun id ()
   (incf *identity*))
 
+(defun plant-bug (c b)
+  (when b (setf (bug-cell b) c))
+  (setf (cell-bug c) b))
+
 (defun add-bug (c &key (size 1) (prey nil))
   (if (is-occupied c)
       (error "cell already occupied")
-      (setf (cell-bug c)
-	    (make-bug :cell c :age 0 :size size :prey prey :id (id)))))
+      (plant-bug c (make-bug :age 0 :size size :prey prey :id (id)))))
 
 (defun dout (&rest rest)
   (apply #'format (cons *error-output* rest)))
@@ -189,9 +192,7 @@
    world
    (lambda (c)
      (when (is-land c)
-       (let ((pos (cell-pos c)))
-	 (add-bug (aref world (pos-x pos) (pos-y pos)))
-	 (return-from create-bugs nil))))))
+       (return-from create-bugs (add-bug c))))))
 
 (defun get-fov-pos (c)
   (mapcar (lambda (p) (pos-add (cell-pos c) p))
@@ -256,7 +257,7 @@
   (>= (bug-size b) *max-size*))
 
 (defun bug-dies (b)
-  (setf (cell-bug (bug-cell b)) nil))
+  (plant-bug (bug-cell b) nil))
 
 (defun bug-dead (b)
   (null (cell-bug (bug-cell b))))
@@ -296,9 +297,8 @@
 (defun move-bug (b c1 c2)
   (attack-prey b c2)
   (when (not (is-occupied c2))
-    (setf (bug-cell b) c2)
-    (setf (cell-bug c2) b)
-    (setf (cell-bug c1) nil)
+    (plant-bug c2 b)
+    (plant-bug c1 nil)
     (when (is-big b)
       (make-baby c1 b))))
 
