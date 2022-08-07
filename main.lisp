@@ -7,9 +7,9 @@
 
 (defparameter *max-size* 10)
 (defparameter *low-size* 5)
-(defparameter *sow-size* 2)
 
-(defparameter *old-age* 20)
+(defparameter *regrowth* 10)
+(defparameter *lifespan* 25)
 
 (defparameter *fov* 5)
 
@@ -87,7 +87,7 @@
   (remove-if-not (lambda (c2) (distance-less len c1 c2)) (cell-fov c1)))
 
 (defun has-nearby-forest (c1)
-  (member-if (lambda (x) (<= *sow-size* (cell-food x)))
+  (member-if (lambda (x) (<= *regrowth* (cell-food x)))
 	     (adjacent-cells c1 1)))
 
 (defun is-growable (c)
@@ -252,7 +252,7 @@
     bugs))
 
 (defun is-old (b)
-  (>= (bug-age b) *old-age*))
+  (>= (bug-age b) *lifespan*))
 
 (defun is-big (b)
   (>= (bug-size b) *max-size*))
