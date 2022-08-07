@@ -360,6 +360,7 @@
 	  (format t "~c[~AA" #\ESC (1+ (map-height)))
 	  (print-simulation-statistics world)
 	  (for-each-cell world #'print-cell)
+	  (format t "~A" (color-code 37))
 	  (if (not extinction)
 	      (sleep *delay*)
 	      (quit)))))))
