@@ -375,7 +375,7 @@
     (format t "~%")))
 
 (defun print-simulation-statistics (world)
-  (format t "~A" (color-code 37))
+  (format t "~A" (color-code 39))
   (format t "N=~A " *epoch*)
   (let ((grazers 0)
 	(predators 0)
@@ -403,12 +403,12 @@
 	  (format t "~c[~AA" #\ESC (1+ (map-height)))
 	  (print-simulation-statistics world)
 	  (for-each-cell world #'print-cell)
-	  (format t "~A" (color-code 37))
+	  (format t "~A" (color-code 39))
 	  (if (not extinction)
 	      (sleep *delay*)
 	      (quit)))))))
 
 (defun top-level ()
   (handler-case (bug-island (create-world))
-    (condition (var) (format t "~AERROR: ~A~%" (color-code 37) var)))
+    (condition (var) (format t "~AERROR: ~A~%" (color-code 39) var)))
   (uiop:quit 0))
