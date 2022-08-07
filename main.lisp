@@ -391,6 +391,10 @@
     (format t "[GRAZERS=~A PREDATORS=~A VEGETATION=~A]~%"
 	    grazers predators vegetation)))
 
+(defun done ()
+  (dout "N=~A~%" *epoch*)
+  (quit))
+
 (defun bug-island (world)
   (let ((*predator* t)
 	(*identity* 0)
@@ -406,7 +410,7 @@
 	  (format t "~A" (color-code 39))
 	  (if (not extinction)
 	      (sleep *delay*)
-	      (quit)))))))
+	      (done)))))))
 
 (defun top-level ()
   (handler-case (bug-island (create-world))
