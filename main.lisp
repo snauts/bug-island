@@ -342,6 +342,14 @@
 	((= 1 step) (sleep 0.02))
 	(t (sleep 0))))
 
+(defun print-simulation-statistics (world)
+  (format t "~A" (color-code 37))
+  (format t "N=~A " *epoch*)
+  (let ((count 0))
+    (for-each-cell
+     world (lambda (c) (when (is-occupied c) (incf count))))
+    (format t "B=~A~%" count)))
+
 (defun bug-island (step world)
   (let ((*predator* t)
 	(*epoch* 0))
@@ -351,7 +359,7 @@
       (let ((extinction (null (advance world))))
 	(when (or extinction (= 0 (mod *epoch* (max 1 step))))
 	  (format t "~c[~AA" #\ESC (1+ (map-height)))
-	  (format t "~AN=~A~%" (color-code 37) *epoch*)
+	  (print-simulation-statistics world)
 	  (for-each-cell world #'print-cell)
 	  (if (not extinction)
 	      (delay step)
