@@ -210,6 +210,7 @@
   (filter-fov-by w #'walkable-fov-cells))
 
 (defun create-world ()
+  (load *file*)
   (let ((world (make-map)))
     (fill-map world #'create-cell)
     (generate-fov world)
@@ -366,7 +367,6 @@
 	      (quit)))))))
 
 (defun top-level ()
-  (load *file*)
   (handler-case (bug-island (create-world))
     (condition (var) (format t "~AERROR: ~A~%" (color-code 37) var)))
   (uiop:quit 0))
