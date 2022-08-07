@@ -176,10 +176,11 @@
   (cell-pos (bug-cell b)))
 
 (defun debug-bug (b &optional (msg ""))
-  (dout "BUG(~A): TIME=~A POS=~A AGE=~A SIZE=~A PREY=~A"
+  (dout "BUG(~A): TIME=~A POS=(~A,~A) AGE=~A SIZE=~A PREY=~A"
 	(bug-id b)
 	*epoch*
-	(bug-pos b)
+	(pos-x (bug-pos b))
+	(pos-y (bug-pos b))
 	(bug-age b)
 	(bug-size b)
 	(bug-prey b))
