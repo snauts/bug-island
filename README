@@ -2,7 +2,13 @@ Bug Island, inspired by Ellen Ullman's novel `the Bug`
 
 1) install sbcl
 2) run ./run.sh
-3) MAP=map2.lisp STEP=10 DELAY=0 ./run.sh
+3) MAP=map2.lisp STEP=10 DELAY=0 REGROWTH=10 LIFESPAN=15 ./run.sh
+
+REGROWTH - defines regrowth rate of vegetation, values from 0 to 10
+	   with value 0 being fastest and value 10 being slowest
+
+LIFESPAN - defines lifespan of bugs, must be value larger than 10
+	   larger lifespan favors predators, lower lifespan favors grazers
 
 "-" = water
 " " = barren land

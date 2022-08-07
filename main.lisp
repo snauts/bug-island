@@ -8,8 +8,8 @@
 (defparameter *max-size* 10)
 (defparameter *low-size* 5)
 
-(defparameter *regrowth* 10)
-(defparameter *lifespan* 25)
+(defparameter *regrowth* 2)
+(defparameter *lifespan* 20)
 
 (defparameter *fov* 5)
 
