@@ -12,7 +12,8 @@
 (defparameter *old-age* 20)
 
 (defparameter *fov* 5)
-(defvar *predator* nil)
+
+(defvar *predator* t)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
@@ -313,9 +314,9 @@
   (= 8 (length (occupied-count b))))
 
 (defun bug-lives (b)
-  (when (and (not *predator*) (surrouned b))
+  (when (and *predator* (surrouned b))
     (turn-into-predator b)
-    (setf *predator* t))
+    (setf *predator* nil))
   (unless (bug-eats b)
     (bug-starves b))
   (unless (bug-dead b)
@@ -338,10 +339,10 @@
 (defun delay (step)
   (cond ((= 0 step) nil)
 	((= 1 step) (sleep 0.02))
-	(t (sleep 1))))
+	(t (sleep 0))))
 
 (defun bug-island (step world)
-  (let ((*predator* nil)
+  (let ((*predator* t)
 	(epoch 0))
     (roll-screen)
     (loop
