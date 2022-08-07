@@ -14,6 +14,7 @@
 (defparameter *fov* 5)
 
 (defvar *predator* t)
+(defvar *epoch* 0)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
@@ -343,14 +344,14 @@
 
 (defun bug-island (step world)
   (let ((*predator* t)
-	(epoch 0))
+	(*epoch* 0))
     (roll-screen)
     (loop
-      (incf epoch)
+      (incf *epoch*)
       (let ((extinction (null (advance world))))
-	(when (or extinction (= 0 (mod epoch (max 1 step))))
+	(when (or extinction (= 0 (mod *epoch* (max 1 step))))
 	  (format t "~c[~AA" #\ESC (1+ (map-height)))
-	  (format t "~AN=~A~%" (color-code 37) epoch)
+	  (format t "~AN=~A~%" (color-code 37) *epoch*)
 	  (for-each-cell world #'print-cell)
 	  (if (not extinction)
 	      (delay step)
