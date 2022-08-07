@@ -1,6 +1,6 @@
 (defstruct cell pos type food bug fov)
 
-(defstruct bug cell age size prey)
+(defstruct bug id cell age size prey)
 
 (defparameter *max-food* 10)
 (defparameter *low-food* 5)
@@ -18,6 +18,7 @@
 (defparameter *file* "map.lisp")
 
 (defvar *predator* t)
+(defvar *identity* 0)
 (defvar *epoch* 0)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
@@ -156,10 +157,14 @@
 	     (not (being-grazed c)))
     (incf (cell-food c))))
 
+(defun id ()
+  (incf *identity*))
+
 (defun add-bug (c &key (size 1) (prey nil))
   (if (is-occupied c)
       (error "cell already occupied")
-      (setf (cell-bug c) (make-bug :cell c :age 0 :size size :prey prey))))
+      (setf (cell-bug c)
+	    (make-bug :cell c :age 0 :size size :prey prey :id (id)))))
 
 (defun create-bugs (world)
   (for-each-cell
@@ -355,6 +360,7 @@
 
 (defun bug-island (world)
   (let ((*predator* t)
+	(*identity* 0)
 	(*epoch* 0))
     (roll-screen)
     (loop
