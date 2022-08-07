@@ -147,10 +147,13 @@
   (when (last-cell-in-a-row c)
     (format t "~%")))
 
+(defun being-grazed (c)
+  (and (is-occupied c) (is-grazer (cell-bug c))))
+
 (defun grow-cell (c)
   (when (and (is-land c)
 	     (is-growable c)
-	     (not (is-occupied c)))
+	     (not (being-grazed c)))
     (incf (cell-food c))))
 
 (defun add-bug (c &key (size 1) (prey nil))
