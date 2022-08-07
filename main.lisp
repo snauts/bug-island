@@ -166,6 +166,24 @@
       (setf (cell-bug c)
 	    (make-bug :cell c :age 0 :size size :prey prey :id (id)))))
 
+(defun dout (&rest rest)
+  (apply #'format (cons *error-output* rest)))
+
+(defun bug-pos (b)
+  (cell-pos (bug-cell b)))
+
+(defun debug-bug (b &optional (msg ""))
+  (dout "BUG(~A): TIME=~A POS=~A AGE=~A SIZE=~A PREY=~A"
+	(bug-id b)
+	*epoch*
+	(bug-pos b)
+	(bug-age b)
+	(bug-size b)
+	(bug-prey b))
+  (when (> (length msg) 0)
+    (dout " MESSAGE=~A" msg))
+  (dout "~%"))
+
 (defun create-bugs (world)
   (for-each-cell
    world
