@@ -80,6 +80,9 @@
 (defun is-barren (c)
   (= 0 (cell-food c)))
 
+(defun has-vegetation (c)
+  (and (not (is-water c)) (not (is-barren c))))
+
 (defun distance-less (len c1 c2)
   (>= len (distance (pos-sub (cell-pos c1) (cell-pos c2)))))
 
@@ -374,10 +377,19 @@
 (defun print-simulation-statistics (world)
   (format t "~A" (color-code 37))
   (format t "N=~A " *epoch*)
-  (let ((count 0))
+  (let ((grazers 0)
+	(predators 0)
+	(vegetation 0))
     (for-each-cell
-     world (lambda (c) (when (is-occupied c) (incf count))))
-    (format t "B=~A~%" count)))
+     world (lambda (c)
+	     (when (has-vegetation c)
+	       (incf vegetation))
+	     (when (is-occupied c)
+	       (if (is-predator (cell-bug c))
+		   (incf predators)
+		   (incf grazers)))))
+    (format t "[GRAZERS=~A PREDATORS=~A VEGETATION=~A]~%"
+	    grazers predators vegetation)))
 
 (defun bug-island (world)
   (let ((*predator* t)
