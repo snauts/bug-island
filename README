@@ -2,12 +2,13 @@ Bug Island, inspired by Ellen Ullman's novel `the Bug`
 
 1) install sbcl
 2) run ./run.sh
-3) ./run.sh 1000		# skip time by 1000 steps
-4) ./run.sh 1 map2.lisp 	# runs simulation on map2
+3) FILE=map2.lisp STEP=10 DELAY=0 ./run.sh
 
 "-" = water
 " " = barren land
 "." = some vegetation
 "*" = dense vegetation
-"o" = small bug
-"O" = large bug
+"o" = small grazer
+"O" = large grazer
+"x" = small predator
+"X" = large predator

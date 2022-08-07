@@ -13,13 +13,17 @@
 
 (defparameter *fov* 5)
 
+(defparameter *step* 1)
+(defparameter *delay* 0)
+(defparameter *file* "map.lisp")
+
 (defvar *predator* t)
 (defvar *epoch* 0)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
-(load "map.lisp")
+(load *file*)
 
 (defun map-width ()
   (length (elt *map* 0)))
@@ -337,11 +341,6 @@
   (dotimes (i (1+ (map-height)))
     (format t "~%")))
 
-(defun delay (step)
-  (cond ((= 0 step) nil)
-	((= 1 step) (sleep 0.02))
-	(t (sleep 0))))
-
 (defun print-simulation-statistics (world)
   (format t "~A" (color-code 37))
   (format t "N=~A " *epoch*)
@@ -350,26 +349,23 @@
      world (lambda (c) (when (is-occupied c) (incf count))))
     (format t "B=~A~%" count)))
 
-(defun bug-island (step world)
+(defun bug-island (world)
   (let ((*predator* t)
 	(*epoch* 0))
     (roll-screen)
     (loop
       (incf *epoch*)
       (let ((extinction (null (advance world))))
-	(when (or extinction (= 0 (mod *epoch* (max 1 step))))
+	(when (or extinction (= 0 (mod *epoch* (max 1 *step*))))
 	  (format t "~c[~AA" #\ESC (1+ (map-height)))
 	  (print-simulation-statistics world)
 	  (for-each-cell world #'print-cell)
 	  (if (not extinction)
-	      (delay step)
+	      (sleep *delay*)
 	      (quit)))))))
 
-(defun run-island (file n)
-  (when (> (length file) 0) (load file))
-  (bug-island (or n 1) (create-world)))
-
-(defun top-level (file &optional n)
-  (handler-case (run-island file n)
+(defun top-level ()
+  (load *file*)
+  (handler-case (bug-island (create-world))
     (condition (var) (format t "~AERROR: ~A~%" (color-code 37) var)))
   (uiop:quit 0))
