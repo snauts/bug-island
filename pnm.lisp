@@ -1,7 +1,7 @@
 (defvar *out* nil)
 
 (defun file-name ()
-  (format nil "pic-~5,'0d.pnm" *epoch*))
+  (format nil "pic.pnm" *epoch*))
 
 (defun save-color (r g b)
   (format *out* "~A~%~A~%~A~%" r g b))
@@ -32,7 +32,15 @@
 	((is-water c) (save-color 0 #x80 #xa0))
 	(t (save-color 0 0 0))))
 
+(defun convert-cmd ()
+  (format nil "convert pic.pnm -adaptive-resize ~Ax~A pic-~5,'0d.gif"
+	  (* 4 (map-width)) (* 4 (map-height)) *epoch*))
+
+(defun convert-to-gif ()
+  (uiop:run-program (convert-cmd) :output nil))
+
 (defun save-picture (world)
   (with-open-file (*out* (file-name) :direction :output :if-exists :supersede)
     (format *out* "P3~%~A ~A 255~%" (map-width) (map-height))
-    (for-each-cell world (lambda (c) (save-cell-pixel c)))))
+    (for-each-cell world (lambda (c) (save-cell-pixel c))))
+  (convert-to-gif))
