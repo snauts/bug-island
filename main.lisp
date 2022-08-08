@@ -24,7 +24,6 @@
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
-(load "pnm.lisp")
 (load *file*)
 
 (defun map-width ()
@@ -192,6 +191,8 @@
   (when (> (length msg) 0)
     (dout " MESSAGE=~A" msg))
   (dout "~%"))
+
+(load "pnm.lisp")
 
 (defun create-bugs (world)
   (fill-alt world)
@@ -411,6 +412,8 @@
 	  (print-simulation-statistics world)
 	  (for-each-cell world #'print-cell)
 	  (format t "~A" (color-code 39))
+	  (when *save-picture*
+	    (save-picture world))
 	  (if (not extinction)
 	      (sleep *delay*)
 	      (done)))))))

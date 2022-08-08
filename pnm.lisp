@@ -1,4 +1,7 @@
-(defparameter *up-scale* 4)
+(defparameter *save-picture* nil)
+
+(declaim (ftype function get-fov-cells))
+
 (defparameter *max-water-alt* nil)
 (defparameter *max-land-alt* nil)
 
@@ -36,7 +39,7 @@
 (defvar *out* nil)
 
 (defun file-name ()
-  (format nil "pic.pnm"))
+  (format nil "pic-~5,'0d.pnm" *epoch*))
 
 (defun save-color (r g b)
   (format *out* "~A~%~A~%~A~%" r g b))
@@ -90,15 +93,7 @@
 	((is-land c) (save-land-pixel c))
 	(t (save-color 0 0 0))))
 
-(defun convert-cmd ()
-  (format nil "convert pic.pnm -adaptive-resize ~Ax~A pic-~5,'0d.gif"
-	  (* *up-scale* (map-width)) (* *up-scale* (map-height)) *epoch*))
-
-(defun convert-to-gif ()
-  (uiop:run-program (convert-cmd) :output nil))
-
 (defun save-picture (world)
   (with-open-file (*out* (file-name) :direction :output :if-exists :supersede)
     (format *out* "P3~%~A ~A 255~%" (map-width) (map-height))
-    (for-each-cell world (lambda (c) (save-cell-pixel c))))
-  (convert-to-gif))
+    (for-each-cell world (lambda (c) (save-cell-pixel c)))))
