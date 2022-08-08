@@ -18,10 +18,12 @@ sbcl --noinform --load main.lisp \
      --eval "(setf *save-picture* $SAVE)" \
      --eval "(top-level)" 2> debug.txt
 
-for F in $(ls *.pnm)
-do
-    convert $F -adaptive-resize 400% $F.gif
-done
+if [ -f pic-00001.pnm ]; then
+    for F in $(ls *.pnm)
+    do
+	convert $F -adaptive-resize 400% $F.gif
+    done
+fi
 
 if [ -f pic-00001.pnm.gif ]; then
     gifsicle --colors 256 --loopcount -d 4 pic*.gif > final.gif
