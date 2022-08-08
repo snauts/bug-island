@@ -1,6 +1,7 @@
 #!/bin/bash
 
-rm *.pnm *.gif -f
+rm pic-*.pnm pic-*.gif -f
+
 STEP=${STEP:-1}
 SAVE=${SAVE:-nil}
 DELAY=${DELAY:-'0.02'}
