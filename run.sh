@@ -7,7 +7,7 @@ DELAY=${DELAY:-'0.02'}
 MAP=${MAP:-'map.lisp'}
 REGROWTH=${REGROWTH:-'6'}
 LIFESPAN=${LIFESPAN:-'14'}
-MIGRATION=${MIGRATION:-'5'}
+MIGRATION=${MIGRATION:-'4'}
 sbcl --noinform --load main.lisp \
      --eval "(setf *file* \"$MAP\")" \
      --eval "(setf *delay* $DELAY)" \
