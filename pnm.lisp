@@ -1,3 +1,4 @@
+(defparameter *up-scale* 8)
 (defparameter *max-water-alt* nil)
 (defparameter *max-land-alt* nil)
 
@@ -40,24 +41,6 @@
 (defun save-color (r g b)
   (format *out* "~A~%~A~%~A~%" r g b))
 
-(defun intensity (b)
-  (let ((s (bug-size b)))
-    (+ 55 (* 20 s))))
-
-(defun save-grazer-pixel (i)
-  (save-color i 0 0))
-
-(defun save-predator-pixel (i)
-  (save-color i 0 i))
-
-(defun save-bug-pixel (b)
-  (if (is-grazer b)
-      (save-grazer-pixel (intensity b))
-      (save-predator-pixel (intensity b))))
-
-(defparameter *forest* '(0.00 0.75 0.00))
-(defparameter *desert* '(0.25 0.25 0.00))
-
 (defun scale-color (c q)
   (mapcar (lambda (x) (* x q)) c))
 
@@ -67,19 +50,39 @@
 (defun save-color-float (c)
   (apply #'save-color (mapcar (lambda (x) (floor (* 255 x))) c)))
 
+(defparameter *grazer-color* '(1.0 0.0 0.0))
+(defparameter *predator-color* '(1.0 0.0 1.0))
+
+(defun intensity (b)
+  (+ 0.25 (* 0.5 (/ (bug-size b) *max-size*))))
+
+(defun save-grazer-pixel (i)
+  (save-color-float (scale-color *grazer-color* i)))
+
+(defun save-predator-pixel (i)
+  (save-color-float (scale-color *predator-color* i)))
+
+(defun save-bug-pixel (b)
+  (if (is-grazer b)
+      (save-grazer-pixel (intensity b))
+      (save-predator-pixel (intensity b))))
+
+(defparameter *forest-color* '(0.00 0.75 0.00))
+(defparameter *desert-color* '(0.25 0.25 0.00))
+
 (defun save-land-pixel (c)
   (let ((a (+ 0.5 (* 0.5 (/ (cell-alt c) *max-land-alt*)))))
     (save-color-float
      (blend-color
-      (scale-color *forest* a)
-      (scale-color *desert* a)
+      (scale-color *forest-color* a)
+      (scale-color *desert-color* a)
       (/ (cell-food c) 10.0)))))
 
-(defun water-gradient (n w)
-  (- n (* w (floor n *max-water-alt*))))
+(defparameter *water-color* '(0 0.375 0.5))
 
 (defun save-water-pixel (w)
-  (save-color 0 (water-gradient 96 w) (water-gradient 128 w)))
+  (let ((q (- 1.0 (* 0.8 (/ w *max-water-alt*)))))
+    (save-color-float (scale-color *water-color* q))))
 
 (defun save-cell-pixel (c)
   (cond ((is-occupied c) (save-bug-pixel (cell-bug c)))
@@ -89,7 +92,7 @@
 
 (defun convert-cmd ()
   (format nil "convert pic.pnm -adaptive-resize ~Ax~A pic-~5,'0d.gif"
-	  (* 4 (map-width)) (* 4 (map-height)) *epoch*))
+	  (* *up-scale* (map-width)) (* *up-scale* (map-height)) *epoch*))
 
 (defun convert-to-gif ()
   (uiop:run-program (convert-cmd) :output nil))
