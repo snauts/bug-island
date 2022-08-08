@@ -1,4 +1,4 @@
-(defparameter *up-scale* 8)
+(defparameter *up-scale* 4)
 (defparameter *max-water-alt* nil)
 (defparameter *max-land-alt* nil)
 
