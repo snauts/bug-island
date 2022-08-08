@@ -1,4 +1,5 @@
 (defparameter *max-water-alt* nil)
+(defparameter *max-land-alt* nil)
 
 (defun adjacent-water (world c)
   (let ((*fov* 1))
@@ -8,11 +9,20 @@
   (lambda (x) (and (numberp (cell-alt x)) (= (1- i) (cell-alt x)))))
 
 (defun fill-alt (world)
+  (setf *max-land-alt* 0.0)
   (setf *max-water-alt* 0)
   (dotimes (i (max (map-width) (map-height)))
     (for-each-cell
      world
      (lambda (c)
+       (when (and (is-land c) (null (cell-alt c)))
+	 (let ((n (adjacent-cells c 1)))
+	   (cond ((< (length n) 4)
+		  (setf (cell-alt c) 0))
+		 ((member-if (test-height i) n)
+		  (when (> i *max-land-alt*)
+		    (setf *max-land-alt* i))
+		  (setf (cell-alt c) i)))))
        (when (and (is-water c) (null (cell-alt c)))
 	 (let ((n (adjacent-water world c)))
 	   (cond ((member-if #'is-land n)
@@ -45,10 +55,25 @@
       (save-grazer-pixel (intensity b))
       (save-predator-pixel (intensity b))))
 
-(defun save-land-pixel (f)
-  (if (= f 0)
-      (save-color 20 35 0)
-      (save-color 0 (+ 55 (* 10 f)) 0)))
+(defparameter *forest* '(0.00 0.75 0.00))
+(defparameter *desert* '(0.25 0.25 0.00))
+
+(defun scale-color (c q)
+  (mapcar (lambda (x) (* x q)) c))
+
+(defun blend-color (c1 c2 q)
+  (mapcar (lambda (x1 x2) (+ (* x1 q) (* x2 (- 1.0 q)))) c1 c2))
+
+(defun save-color-float (c)
+  (apply #'save-color (mapcar (lambda (x) (floor (* 255 x))) c)))
+
+(defun save-land-pixel (c)
+  (let ((a (+ 0.5 (* 0.5 (/ (cell-alt c) *max-land-alt*)))))
+    (save-color-float
+     (blend-color
+      (scale-color *forest* a)
+      (scale-color *desert* a)
+      (/ (cell-food c) 10.0)))))
 
 (defun water-gradient (n w)
   (- n (* w (floor n *max-water-alt*))))
@@ -58,8 +83,8 @@
 
 (defun save-cell-pixel (c)
   (cond ((is-occupied c) (save-bug-pixel (cell-bug c)))
-	((is-land c) (save-land-pixel (cell-food c)))
 	((is-water c) (save-water-pixel (cell-alt c)))
+	((is-land c) (save-land-pixel c))
 	(t (save-color 0 0 0))))
 
 (defun convert-cmd ()
