@@ -98,7 +98,6 @@
   (uiop:run-program (convert-cmd) :output nil))
 
 (defun save-picture (world)
-  (unless *max-water-alt* (fill-alt world))
   (with-open-file (*out* (file-name) :direction :output :if-exists :supersede)
     (format *out* "P3~%~A ~A 255~%" (map-width) (map-height))
     (for-each-cell world (lambda (c) (save-cell-pixel c))))

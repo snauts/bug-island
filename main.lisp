@@ -24,6 +24,7 @@
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
 (load "math.lisp")
+(load "pnm.lisp")
 (load *file*)
 
 (defun map-width ()
@@ -192,10 +193,11 @@
   (dout "~%"))
 
 (defun create-bugs (world)
+  (fill-alt world)
   (for-each-cell
    world
    (lambda (c)
-     (when (is-land c)
+     (when (and (is-land c) (= *max-land-alt* (cell-alt c)))
        (return-from create-bugs (add-bug c))))))
 
 (defun get-fov-pos (c)
