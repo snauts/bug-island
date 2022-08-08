@@ -120,7 +120,8 @@
   (numberp (bug-prey b)))
 
 (defun turn-into-predator (b)
-  (setf (bug-prey b) 0))
+  (setf (bug-prey b) 0)
+  (setf (bug-age b) 0))
 
 (defun is-grazer (b)
   (not (is-predator b)))
