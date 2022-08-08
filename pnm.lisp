@@ -76,7 +76,7 @@
      (blend-color
       (scale-color *forest-color* a)
       (scale-color *desert-color* a)
-      (/ (cell-food c) 10.0)))))
+      (/ (cell-food c) *max-food*)))))
 
 (defparameter *water-color* '(0 0.375 0.5))
 
