@@ -1,4 +1,4 @@
-(defstruct cell pos type food bug fov)
+(defstruct cell pos type food bug fov alt)
 
 (defstruct bug id cell age size prey)
 
