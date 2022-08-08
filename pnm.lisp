@@ -1,3 +1,4 @@
+(defparameter *pnm-map* "nil")
 (defparameter *save-picture* nil)
 
 (declaim (ftype function get-fov-cells))

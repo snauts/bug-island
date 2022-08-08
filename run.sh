@@ -3,6 +3,7 @@
 rm pic-*.pnm pic-*.gif -f
 
 STEP=${STEP:-1}
+PNM=${PNM:-nil}
 SAVE=${SAVE:-nil}
 DELAY=${DELAY:-'0.02'}
 MAP=${MAP:-'map.lisp'}
@@ -13,6 +14,7 @@ sbcl --noinform --load main.lisp \
      --eval "(setf *file* \"$MAP\")" \
      --eval "(setf *delay* $DELAY)" \
      --eval "(setf *step* $STEP)" \
+     --eval "(setf *pnm-map* \"$PNM\")" \
      --eval "(setf *regrowth* $REGROWTH)" \
      --eval "(setf *lifespan* $LIFESPAN)" \
      --eval "(setf *low-food* $MIGRATION)" \

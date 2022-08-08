@@ -246,6 +246,8 @@
 
 (defun create-world ()
   (load *file*)
+  (when (not (equal "nil" *pnm-map*))
+    (load-map *pnm-map*))
   (let ((world (make-map)))
     (fill-map world #'create-cell)
     (generate-fov world)
