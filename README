@@ -2,7 +2,7 @@ Bug Island, inspired by Ellen Ullman's novel `the Bug`
 
 1) install sbcl
 2) run ./run.sh
-3) MAP=map2.lisp DELAY=0 MIGRATION=7 REGROWTH=3 LIFESPAN=20 ./run.sh
+3) MAP=map2.lisp DELAY=0 MIGRATION=6 REGROWTH=3 LIFESPAN=20 ./run.sh
 
 REGROWTH - defines regrowth rate of vegetation, values from 0 to 10
 	   with value 0 being fastest and value 10 being slowest
