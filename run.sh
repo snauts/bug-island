@@ -22,7 +22,7 @@ sbcl --noinform --load main.lisp \
      --eval "(top-level)" 2> debug.txt
 
 if [ -f pic-00001.pnm ]; then
-    for F in $(ls *.pnm)
+    for F in pic-*.pnm
     do
 	convert $F -adaptive-resize 400% $F.gif
     done
