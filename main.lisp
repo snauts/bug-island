@@ -19,7 +19,7 @@
 
 (defvar *predator* t)
 (defvar *identity* 0)
-(defvar *alien* nil)
+(defvar *alien* t)
 (defvar *epoch* 0)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
@@ -124,7 +124,7 @@
   (setf (bug-age b) 0))
 
 (defun alien-predator-arrives (b)
-  (setf (bug-alien b) t))
+  (setf (bug-alien b) 0))
 
 (defun is-grazer (b)
   (not (is-predator b)))
@@ -379,9 +379,9 @@
   (when (and *predator* (surrouned b))
     (turn-into-predator b)
     (setf *predator* nil))
-  (when (and (not *alien*) (good-for-alien b))
+  (when (and *alien* (good-for-alien b))
     (alien-predator-arrives b)
-    (setf *alien* b))
+    (setf *alien* nil))
   (unless (bug-eats b)
     (bug-starves b))
   (unless (bug-dead b)
@@ -426,7 +426,7 @@
 (defun bug-island (world)
   (let ((*predator* t)
 	(*identity* 0)
-	(*alien* nil)
+	(*alien* t)
 	(*epoch* 0))
     (roll-screen)
     (loop
