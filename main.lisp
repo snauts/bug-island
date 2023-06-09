@@ -267,7 +267,7 @@
     bugs))
 
 (defun is-old (b)
-  (>= (bug-age b) *lifespan*))
+  (and (>= (bug-age b) *lifespan*) (not (bug-alien b))))
 
 (defun is-big (b)
   (>= (bug-size b) *max-size*))
