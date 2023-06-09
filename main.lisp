@@ -359,8 +359,8 @@
 	      (cell-food src)))))
 
 (defun should-move (b src dst)
-  (or (is-big b)
-      (bug-alien b)
+  (or (bug-alien b)
+      (is-fertile b)
       (if (is-grazer b)
 	  (is-greedy src dst)
 	  (= 0 (bug-prey b)))))
