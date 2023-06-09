@@ -1,6 +1,6 @@
 (defstruct cell pos type food bug fov alt)
 
-(defstruct bug id cell age size prey)
+(defstruct bug id cell age size prey alien)
 
 (defparameter *max-food* 10)
 (defparameter *low-food* 5)
@@ -19,6 +19,7 @@
 
 (defvar *predator* t)
 (defvar *identity* 0)
+(defvar *alien* t)
 (defvar *epoch* 0)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
@@ -122,6 +123,9 @@
   (setf (bug-prey b) 0)
   (setf (bug-age b) 0))
 
+(defun alien-predator-arrives (b)
+  (setf (bug-alien b) t))
+
 (defun is-grazer (b)
   (not (is-predator b)))
 
@@ -132,6 +136,8 @@
 	   (color-code 31 #\o))
 	  ((and big (not bad))
 	   (color-code 91 #\O))
+	  ((bug-alien b)
+	   (color-code 96 #\@))
 	  ((and (not big) bad)
 	   (color-code 35 #\x))
 	  ((and big bad)
@@ -267,8 +273,9 @@
   (>= (bug-size b) *max-size*))
 
 (defun bug-dies (b)
-  (plant-bug (bug-cell b) nil)
-  (setf (bug-cell b) nil))
+  (unless (bug-alien b)
+    (plant-bug (bug-cell b) nil)
+    (setf (bug-cell b) nil)))
 
 (defun bug-dead (b)
   (null (bug-cell b)))
@@ -310,7 +317,7 @@
   (when (not (is-occupied c2))
     (plant-bug c2 b)
     (plant-bug c1 nil)
-    (when (is-big b)
+    (when (and (is-big b) (not (bug-alien b)))
       (make-baby c1 b))))
 
 (defun best-pasture (b)
@@ -350,16 +357,25 @@
     (when (and dst (or (is-big b) (should-move b src dst)))
       (move-bug b src (from-to src dst)))))
 
-(defun occupied-count (b)
+(defun occupied-neighbors (b)
   (remove-if-not #'is-occupied (adjacent-cells (bug-cell b) 2)))
 
-(defun surrouned (b)
-  (= 8 (length (occupied-count b))))
+(defun occupied-by-grazer (c)
+  (is-grazer (cell-bug c)))
+
+(defun predator-neighbors (b)
+  (remove-if #'occupied-by-grazer (occupied-neighbors b)))
+
+(defun surrouned (b &optional (fn #'occupied-neighbors))
+  (= 8 (length (funcall fn b))))
 
 (defun bug-lives (b)
   (when (and *predator* (surrouned b))
     (turn-into-predator b)
     (setf *predator* nil))
+  (when (and *alien* (surrouned b #'predator-neighbors))
+    (alien-predator-arrives b)
+    (setf *alien* nil))
   (unless (bug-eats b)
     (bug-starves b))
   (unless (bug-dead b)
@@ -404,6 +420,7 @@
 (defun bug-island (world)
   (let ((*predator* t)
 	(*identity* 0)
+	(*alien* nil)
 	(*epoch* 0))
     (roll-screen)
     (loop
