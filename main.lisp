@@ -19,7 +19,7 @@
 
 (defvar *predator* t)
 (defvar *identity* 0)
-(defvar *alien* t)
+(defvar *alien* nil)
 (defvar *epoch* 0)
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
@@ -312,12 +312,15 @@
 	(setf (bug-prey b) (bug-size victim))
 	(bug-dies victim)))))
 
+(defun is-fertile (b)
+  (and (is-big b) (not (bug-alien b))))
+
 (defun move-bug (b c1 c2)
   (attack-prey b c2)
   (when (not (is-occupied c2))
     (plant-bug c2 b)
     (plant-bug c1 nil)
-    (when (and (is-big b) (not (bug-alien b)))
+    (when (is-fertile b)
       (make-baby c1 b))))
 
 (defun best-pasture (b)
@@ -366,16 +369,19 @@
 (defun predator-neighbors (b)
   (remove-if #'occupied-by-grazer (occupied-neighbors b)))
 
-(defun surrouned (b &optional (fn #'occupied-neighbors))
-  (= 8 (length (funcall fn b))))
+(defun surrouned (b &optional (num 8) (fn #'occupied-neighbors))
+  (= num (length (funcall fn b))))
+
+(defun good-for-alien (b)
+  (and (is-predator b) (surrouned b 6 #'predator-neighbors)))
 
 (defun bug-lives (b)
   (when (and *predator* (surrouned b))
     (turn-into-predator b)
     (setf *predator* nil))
-  (when (and *alien* (surrouned b #'predator-neighbors))
+  (when (and (not *alien*) (good-for-alien b))
     (alien-predator-arrives b)
-    (setf *alien* nil))
+    (setf *alien* b))
   (unless (bug-eats b)
     (bug-starves b))
   (unless (bug-dead b)
