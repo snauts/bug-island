@@ -24,6 +24,7 @@
 
 (format t "Bug Island, inspired by Ellen Ullman's novel `the Bug`~%")
 
+(load "neural.lisp")
 (load "math.lisp")
 (load *file*)
 
@@ -124,7 +125,7 @@
   (setf (bug-age b) 0))
 
 (defun alien-predator-arrives (b)
-  (setf (bug-alien b) 0))
+  (setf (bug-alien b) (make-sigmoid '(40 100 100 1))))
 
 (defun is-grazer (b)
   (not (is-predator b)))
