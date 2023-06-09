@@ -308,7 +308,7 @@
 (defun attack-prey (b c2)
   (when (and (is-occupied c2) (is-predator b))
     (let ((victim (cell-bug c2)))
-      (when (is-grazer victim)
+      (when (or (is-grazer victim) (bug-alien b))
 	(setf (bug-prey b) (bug-size victim))
 	(bug-dies victim)))))
 
@@ -338,10 +338,19 @@
   (let ((fov (copy-list (cell-fov (bug-cell b)))))
     (first (sort (remove-if-not #'cell-meat fov) #'> :key #'hunt-value))))
 
+(defun random-elt (l)
+  (elt l (random (length l))))
+
+(defun alien-move (b)
+  (random-elt (remove-if #'is-water (adjacent-cells (bug-cell b) 2))))
+
 (defun best-move (b)
-  (if (is-grazer b)
-      (best-pasture b)
-      (best-hunt b)))
+  (cond ((is-grazer b)
+	 (best-pasture b))
+	((bug-alien b)
+	 (alien-move b))
+	((is-predator b)
+	 (best-hunt b))))
 
 (defun is-greedy (src dst)
   (and (not (is-rich src))
@@ -350,14 +359,16 @@
 	      (cell-food src)))))
 
 (defun should-move (b src dst)
-  (if (is-grazer b)
-      (is-greedy src dst)
-      (= 0 (bug-prey b))))
+  (or (is-big b)
+      (bug-alien b)
+      (if (is-grazer b)
+	  (is-greedy src dst)
+	  (= 0 (bug-prey b)))))
 
 (defun bug-moves (b)
   (let ((dst (best-move b))
 	(src (bug-cell b)))
-    (when (and dst (or (is-big b) (should-move b src dst)))
+    (when (and dst (should-move b src dst))
       (move-bug b src (from-to src dst)))))
 
 (defun occupied-neighbors (b)
