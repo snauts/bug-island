@@ -135,14 +135,14 @@
 (defun alien-memory (b)
   (first (bug-alien b)))
 
-(defun alien-forgets (b)
-  (setf (first (bug-alien b)) nil))
+(defun alien-reset-memory (b &optional memory)
+  (setf (first (bug-alien b)) memory))
 
 (defun alien-remember (b env fuzzy)
   (let* ((memory (alien-memory b))
 	 (moment (list env fuzzy))
 	 (truncate (min *fov* (length memory))))
-    (setf (first (bug-alien b)) (cons moment (subseq memory 0 truncate)))))
+    (alien-reset-memory b (cons moment (subseq memory 0 truncate)))))
 
 (defun alien-network (b)
   (second (bug-alien b)))
@@ -332,7 +332,7 @@
 
 (defun alien-kills (b)
   (train (alien-network b) (alien-memory b))
-  (alien-forgets b)
+  (alien-reset-memory b)
   (incf *kills*))
 
 (defun attack-prey (b c2)
@@ -407,7 +407,7 @@
 	 (fuzzy (get-fuzzy b env))
 	 (dst-move (get-adjacent b fuzzy)))
     (if (null dst-move)
-	(alien-forgets b)
+	(alien-reset-memory b)
 	(alien-remember b env fuzzy))
     dst-move))
 
