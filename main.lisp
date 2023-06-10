@@ -14,6 +14,7 @@
 (defparameter *fov* 5)
 
 (defparameter *step* 1)
+(defparameter *kills* 0)
 (defparameter *delay* 0)
 (defparameter *world* nil)
 (defparameter *file* "map.lisp")
@@ -329,15 +330,16 @@
   (when (is-predator b)
     (setf (bug-prey b) 0))) ; all the predator food stock goes to baby
 
-(defun alien-learns (b)
+(defun alien-kills (b)
   (train (alien-network b) (alien-memory b))
-  (alien-forgets b))
+  (alien-forgets b)
+  (incf *kills*))
 
 (defun attack-prey (b c2)
   (when (and (is-occupied c2) (is-predator b))
     (let ((victim (cell-bug c2)))
       (when (or (is-grazer victim) (bug-alien b))
-	(when (bug-alien b) (alien-learns b))
+	(when (bug-alien b) (alien-kills b))
 	(setf (bug-prey b) (bug-size victim))
 	(bug-dies victim)))))
 
@@ -492,8 +494,8 @@
 	       (if (is-predator (cell-bug c))
 		   (incf predators)
 		   (incf grazers)))))
-    (format t "[GRAZERS=~A PREDATORS=~A VEGETATION=~A]~%"
-	    grazers predators vegetation)))
+    (format t "[GRAZERS=~A PREDATORS=~A VEGETATION=~A KILLS=~A]~%"
+	    grazers predators vegetation *kills*)))
 
 (defun done ()
   (dout "N=~A~%" *epoch*)
