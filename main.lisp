@@ -505,7 +505,7 @@
   (let ((*world* world)
 	(*predator* t)
 	(*identity* 0)
-	(*alien* t)
+	(*alien* nil)
 	(*epoch* 0))
     (roll-screen)
     (loop
