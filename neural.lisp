@@ -125,7 +125,7 @@
   (forward-propagate network input)
   (map 'list #'neuron-out (output-layer network)))
 
-(defun train (network data epoch)
+(defun train (network data &optional (epoch 1))
   (dotimes (i epoch network)
     (dolist (datum data)
       (back-propagate network (first datum) (second datum)))))

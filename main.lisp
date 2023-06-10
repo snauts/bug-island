@@ -131,9 +131,18 @@
       (setf fov (circle *fov* (make-pos 0 0))))
     fov))
 
+(defun alien-memory (b)
+  (first (bug-alien b)))
+
+(defun alien-forgets (b)
+  (setf (first (bug-alien b)) nil))
+
+(defun alien-network (b)
+  (second (bug-alien b)))
+
 (defun alien-predator-arrives (b)
   (let ((size (* 2 (length (alien-fov)))))
-    (setf (bug-alien b) (make-sigmoid (list size size size 2)))))
+    (setf (bug-alien b) (list nil (make-sigmoid (list size size size 2))))))
 
 (defun is-grazer (b)
   (not (is-predator b)))
@@ -314,10 +323,15 @@
   (when (is-predator b)
     (setf (bug-prey b) 0))) ; all the predator food stock goes to baby
 
+(defun alien-learns (b)
+  (train (alien-network b) (alien-memory b))
+  (alien-forgets b))
+
 (defun attack-prey (b c2)
   (when (and (is-occupied c2) (is-predator b))
     (let ((victim (cell-bug c2)))
       (when (or (is-grazer victim) (bug-alien b))
+	(when (bug-alien b) (alien-learns b))
 	(setf (bug-prey b) (bug-size victim))
 	(bug-dies victim)))))
 
@@ -373,11 +387,18 @@
   (destructuring-bind (x y) fuzzy-move
     (let* ((offset (make-pos (get-interval x) (get-interval y)))
 	   (cell (get-cell (bug-offset b offset))))
-      (unless (or (is-water cell) (eq cell (bug-cell b)))
-	cell))))
+      (and (not (or (is-water cell) (eq cell (bug-cell b)))) cell))))
+
+(defun get-fuzzy (b env)
+  (if (= 0 (bug-prey b))
+      (list (random 1.0) (random 1.0))
+      (consult (alien-network b) env)))
 
 (defun alien-move (b)
-  (get-adjacent b (consult (bug-alien b) (alien-env b))))
+  (let* ((env (alien-env b))
+	 (fuzzy (get-fuzzy b env))
+	 (dst (get-adjacent b fuzzy)))
+    dst))
 
 (defun best-move (b)
   (cond ((is-grazer b)
