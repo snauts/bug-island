@@ -353,17 +353,31 @@
 (defun get-cell (pos)
   (aref *world* (pos-x pos) (pos-y pos)))
 
+(defun bug-offset (b offset)
+  (pos-add offset (cell-pos (bug-cell b))))
+
 (defun alien-env (b)
   (let ((env nil))
     (dolist (offset (alien-fov) env)
-      (let* ((pos (pos-add offset (cell-pos (bug-cell b))))
+      (let* ((pos (bug-offset b offset))
 	     (cell (and (good-pos pos) (get-cell pos))))
 	(push (if (or (null cell) (is-water cell)) 0.0 1.0) env)
 	(push (if (and cell (is-occupied cell)) 1.0 0.0) env)))))
 
+(defun get-interval (x)
+  (cond ((< x 0.333) -1)
+	((> x 0.666)  1)
+	(t 0)))
+
+(defun get-adjacent (b fuzzy-move)
+  (destructuring-bind (x y) fuzzy-move
+    (let* ((offset (make-pos (get-interval x) (get-interval y)))
+	   (cell (get-cell (bug-offset b offset))))
+      (unless (or (is-water cell) (eq cell (bug-cell b)))
+	cell))))
+
 (defun alien-move (b)
-  (forward-propagate (bug-alien b) (alien-env b))
-  (random-elt (remove-if #'is-water (adjacent-cells (bug-cell b) 2))))
+  (get-adjacent b (consult (bug-alien b) (alien-env b))))
 
 (defun best-move (b)
   (cond ((is-grazer b)
