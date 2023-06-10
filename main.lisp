@@ -137,6 +137,12 @@
 (defun alien-forgets (b)
   (setf (first (bug-alien b)) nil))
 
+(defun alien-remember (b env fuzzy)
+  (let* ((memory (alien-memory b))
+	 (moment (list env fuzzy))
+	 (truncate (min *fov* (length memory))))
+    (setf (first (bug-alien b)) (cons moment (subseq memory 0 truncate)))))
+
 (defun alien-network (b)
   (second (bug-alien b)))
 
@@ -379,9 +385,9 @@
 	(push (if (and cell (is-occupied cell)) 1.0 0.0) env)))))
 
 (defun get-interval (x)
-  (cond ((< x 0.333) -1)
-	((> x 0.666)  1)
-	(t 0)))
+  (cond ((< x 0.333) 0)
+	((< x 0.666) 1)
+	(t -1)))
 
 (defun get-adjacent (b fuzzy-move)
   (destructuring-bind (x y) fuzzy-move
@@ -397,8 +403,11 @@
 (defun alien-move (b)
   (let* ((env (alien-env b))
 	 (fuzzy (get-fuzzy b env))
-	 (dst (get-adjacent b fuzzy)))
-    dst))
+	 (dst-move (get-adjacent b fuzzy)))
+    (if (null dst-move)
+	(alien-forgets b)
+	(alien-remember b env fuzzy))
+    dst-move))
 
 (defun best-move (b)
   (cond ((is-grazer b)
