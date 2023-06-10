@@ -15,6 +15,7 @@
 
 (defparameter *step* 1)
 (defparameter *delay* 0)
+(defparameter *world* nil)
 (defparameter *file* "map.lisp")
 
 (defvar *predator* t)
@@ -124,8 +125,15 @@
   (setf (bug-prey b) 0)
   (setf (bug-age b) 0))
 
+(let ((fov nil))
+  (defun alien-fov ()
+    (unless fov
+      (setf fov (circle *fov* (make-pos 0 0))))
+    fov))
+
 (defun alien-predator-arrives (b)
-  (setf (bug-alien b) (make-sigmoid '(40 100 100 1))))
+  (let ((size (* 2 (length (alien-fov)))))
+    (setf (bug-alien b) (make-sigmoid (list size size size 2)))))
 
 (defun is-grazer (b)
   (not (is-predator b)))
@@ -342,7 +350,19 @@
 (defun random-elt (l)
   (elt l (random (length l))))
 
+(defun get-cell (pos)
+  (aref *world* (pos-x pos) (pos-y pos)))
+
+(defun alien-env (b)
+  (let ((env nil))
+    (dolist (offset (alien-fov) env)
+      (let* ((pos (pos-add offset (cell-pos (bug-cell b))))
+	     (cell (and (good-pos pos) (get-cell pos))))
+	(push (if (or (null cell) (is-water cell)) 0.0 1.0) env)
+	(push (if (and cell (is-occupied cell)) 1.0 0.0) env)))))
+
 (defun alien-move (b)
+  (forward-propagate (bug-alien b) (alien-env b))
   (random-elt (remove-if #'is-water (adjacent-cells (bug-cell b) 2))))
 
 (defun best-move (b)
@@ -436,7 +456,8 @@
   (quit))
 
 (defun bug-island (world)
-  (let ((*predator* t)
+  (let ((*world* world)
+	(*predator* t)
 	(*identity* 0)
 	(*alien* t)
 	(*epoch* 0))
