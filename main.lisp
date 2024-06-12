@@ -525,4 +525,4 @@
 (defun top-level ()
   (handler-case (bug-island (create-world))
     (condition (var) (format t "~AERROR: ~A~%" (color-code 39) var)))
-  (uiop:quit 0))
+  (sb-ext:quit 0))
